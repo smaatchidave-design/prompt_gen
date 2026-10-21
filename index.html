@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Prompt Generator</title>
+    <!-- Points to your professional separate stylesheet dynamically served by FastAPI -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <style>
+        :root {
+    --bg-main: #0f172a;       /* Deep slate background */
+    --bg-card: #1e293b;       /* Rich card surface */
+    --bg-input: #020617;      /* High-contrast element fills */
+    --border-color: #334155;  /* Subtle metallic borders */
+    --text-primary: #f8fafc;  /* Clean white headings */
+    --text-muted: #94a3b8;    /* Soft gray description text */
+    --accent-cyan: #22d3ee;   /* Cyber cyan branding */
+    --accent-blue: #2563eb;   /* Deep interactive blue */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 42rem;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.app-title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(to right, var(--accent-cyan), #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-subtitle {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    margin-bottom: 0.25rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.input-field:focus {
+    border-color: var(--accent-cyan);
+}
+
+textarea.input-field {
+    resize: none;
+}
+
+.grid-selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(to right, #06b6d4, var(--accent-blue));
+    color: #ffffff;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.15);
+    transition: all 0.2s ease-in-out;
+}
+
+.submit-btn:hover {
+    filter: brightness(1.1);
+}
+
+.submit-btn:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.output-block {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.output-block.hidden {
+    display: none;
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.output-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+}
+
+.copy-btn {
+    font-size: 0.75rem;
+    background-color: #334155;
+    color: #cbd5e1;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.copy-btn:hover {
+    background-color: #475569;
+}
+
+.output-box {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: #cbd5e1;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 15rem;
+    overflow-y: auto;
+}
+
+    </style>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h1 class="app-title">Smart Prompt Generator</h1>
+            <p class="app-subtitle">Transform raw ideas into high-tier AI instructions instantly.</p>
+        </div>
+
+        <!-- Inputs -->
+        <div>
+            <div class="form-group">
+                <label class="form-label">Your Raw Idea / Request</label>
+                <textarea id="userInput" rows="4" class="input-field" placeholder="e.g., write a sales email for a fitness app..."></textarea>
+            </div>
+
+            <div class="grid-selects form-group">
+                <div>
+                    <label class="form-label">AI Role / Persona</label>
+                    <select id="roleSelect" class="input-field">
+                        <option value="Expert Marketer">Expert Marketer</option>
+                        <option value="Senior Software Engineer">Senior Software Engineer</option>
+                        <option value="Creative Copywriter">Creative Copywriter</option>
+                        <option value="Product Manager">Product Manager</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Desired Tone</label>
+                    <select id="toneSelect" class="input-field">
+                        <option value="Professional & Direct">Professional & Direct</option>
+                        <option value="Creative & Engaging">Creative & Engaging</option>
+                        <option value="Technical & Analytical">Technical & Analytical</option>
+                        <option value="Casual & Friendly">Casual & Friendly</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="generateBtn" onclick="generatePrompt()" class="submit-btn">
+                <span id="btnText">Engineer Prompt</span>
+            </button>
+        </div>
+
+        <!-- Outputs -->
+        <div id="outputSection" class="output-block hidden">
+            <div class="output-header">
+                <span class="output-title">Your Optimized Prompt:</span>
+                <button onclick="copyToClipboard()" class="copy-btn">Copy Prompt</button>
+            </div>
+            <div id="outputText" class="output-box"></div>
+        </div>
+    </div>
+
+    <!-- Communication Script -->
+    <script>
+        async function generatePrompt() {
+            const userInput = document.getElementById('userInput').value;
+            const role = document.getElementById('roleSelect').value;
+            const tone = document.getElementById('toneSelect').value;
+            const btnText = document.getElementById('btnText');
+            const generateBtn = document.getElementById('generateBtn');
+            const outputSection = document.getElementById('outputSection');
+            const outputText = document.getElementById('outputText');
+
+            if (!userInput.trim()) {
+                alert("Please type an idea first!");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            btnText.innerText = "Generating...";
+
+            try {
+                const response = await fetch('/generate-prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_input: userInput, role: role, tone: tone })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    outputText.innerText = data.smart_prompt;
+                    outputSection.classList.remove('hidden');
+                } else {
+                    alert("API Error: " + (data.detail || JSON.stringify(data)));
+                }
+            } catch (err) {
+                alert("Could not process request. Please look closely at your black CMD window for error trace details.");
+            } finally {
+                generateBtn.disabled = false;
+                btnText.innerText = "Engineer Prompt";
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('outputText').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
